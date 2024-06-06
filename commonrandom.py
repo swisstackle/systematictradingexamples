@@ -50,10 +50,20 @@ def generate_trends(Nlength, Tlength , Xamplitude):
     
     return alltrends
 
+
+def generate_upward_trends(Nlength, Tlength, Xamplitude):
+    """
+    Generates an upward price process, Nlength returns, underlying trend with length T and amplitude X
+    
+    returns a vector of numbers as a list
+    """
+    trend_step = Xamplitude / Tlength
+    trend = np.arange(start=0, stop=Nlength * trend_step, step=trend_step)
+    return trend[:Nlength]
     
 
     
-def generate_trendy_price(Nlength, Tlength , Xamplitude, Volscale, sines=False):
+def generate_trendy_price(Nlength, Tlength , Xamplitude, Volscale, sines=False, updown=False, combined=False, slope=1.0):
     """
     Generates a trend of length N amplitude X, plus gaussian noise mean zero std. dev (vol scale * amplitude)
     
@@ -67,13 +77,57 @@ def generate_trendy_price(Nlength, Tlength , Xamplitude, Volscale, sines=False):
 
     ## Can use a different process here if desired
     if sines:
-        process=generate_siney_trends(Nlength, Tlength , Xamplitude) 
+        process=generate_siney_trends(Nlength, Tlength , Xamplitude)
+    elif updown:
+        process = generate_upward_trends(Nlength, Tlength, Xamplitude)
+    elif combined:
+        process = combine_trends_elementwise(Nlength, Tlength, Xamplitude, slope)
     else:
         process=generate_trends(Nlength, Tlength , Xamplitude)    
     
     combined_price=[noise_item+process_item for (noise_item, process_item) in zip(noise, process)]
     
     return combined_price
+
+def combine_trends_elementwise(Nlength, Tlength, Xamplitude, upward_slope):
+    """
+    Combines a sideways oscillating trend with an upward trend.
+    
+    Parameters:
+    Nlength (int): Number of data points.
+    Tlength (int): Period length of the oscillating trend.
+    Xamplitude (float): Amplitude of the oscillating trend.
+    upward_slope (float): Slope of the upward trend.
+
+    Returns:
+    list: Combined trend as a list of numbers.
+    """
+    
+    # Generate sideways oscillating trend
+    sideways_trend = generate_trends(Nlength, Tlength, Xamplitude)
+    
+    # Generate upward trend
+    upward_trend = generate_upward_trends(Nlength, Nlength, upward_slope)
+    
+    # Combine the two trends
+    combined_trend = [sideways + upward for sideways, upward in zip(sideways_trend, upward_trend)]
+    
+    return combined_trend
+
+def append_trends(*trends):
+    """
+    Appends multiple trends to create a single continuous trend.
+    
+    Parameters:
+    *trends: An arbitrary number of trend lists.
+    
+    Returns:
+    list: Combined trend as a single list of numbers.
+    """
+    combined_trend = []
+    for trend in trends:
+        combined_trend.extend(trend)
+    return combined_trend
 
 def generate_noise(Nlength, stdev):
     """
