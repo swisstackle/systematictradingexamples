@@ -87,7 +87,7 @@ def ewmac_forecast_scalar(Lfast, Lslow):
     if lkey in fsdict:
         return fsdict[lkey]
     else:
-        print "Warning: No scalar defined for Lfast=%d, Lslow=%d, using default of 1.0" % (Lfast, Lslow)
+        print("Warning: No scalar defined for Lfast=%d, Lslow=%d, using default of 1.0" % (Lfast, Lslow))
         return 1.0
 
 def get_price_for_instrument(code):
@@ -295,23 +295,18 @@ def cum_perc(pd_timeseries):
     return cum_datalist.cumprod()
 
 
-def arbitrary_timeindex(Nperiods, index_start=pd.datetime(2000,1,1)):
+def arbitrary_timeindex(Nperiods, index_start=pd.to_datetime('2000-01-01')):
     """
     For nice plotting, convert a list of prices or returns into an arbitrary pandas time series
-    """    
-    
-    ans=pd.bdate_range(start=index_start, periods=Nperiods)
-    
+    """
+    ans = pd.bdate_range(start=index_start, periods=Nperiods)
     return ans
 
-
-def arbitrary_timeseries(datalist, index_start=pd.datetime(2000,1,1)):
+def arbitrary_timeseries(datalist, index_start=pd.to_datetime('2000-01-01')):
     """
     For nice plotting, convert a list of prices or returns into an arbitrary pandas time series
-    """    
-    
-    ans=pd.TimeSeries(datalist, index=arbitrary_timeindex(len(datalist), index_start))
-    
+    """
+    ans = pd.Series(datalist, index=arbitrary_timeindex(len(datalist), index_start))
     return ans
 
 def remove_nans_from_list(xlist):
